@@ -1,11 +1,10 @@
-use wallpaper;
 use std::sync::mpsc;
 use tray_item::{IconSource, TrayItem};
+use std::thread;
 
 enum Message {
     Quit,
-    Green,
-    Red,
+    Open,
 }
 
 fn main() {
@@ -18,18 +17,8 @@ fn main() {
     let (tx, rx) = mpsc::sync_channel(1);
 
     let red_tx = tx.clone();
-    tray.add_menu_item("Red", move || {
-        wallpaper::set_from_url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgqQAGfEEbIV5AYM6_BlOQ-M73TKzuEBqYDJGn7Jih6g&s").unwrap();
-        wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
-        red_tx.send(Message::Red).unwrap();
-    })
-    .unwrap();
-
-    let green_tx = tx.clone();
-    tray.add_menu_item("Green", move || {
-        wallpaper::set_from_url("https://browsecat.art/sites/default/files/animated-nature-background-126761-1031169-5603413.png").unwrap();
-        wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
-        green_tx.send(Message::Green).unwrap();
+    tray.add_menu_item("Open App", move || {
+        red_tx.send(Message::Open).unwrap();
     })
     .unwrap();
 
@@ -42,20 +31,25 @@ fn main() {
     .unwrap();
 
     loop {
+        thread::spawn(|| {
+            // Run wallpaper manager in the background
+        });
         match rx.recv() {
             Ok(Message::Quit) => {
+                // Shutdown the background task too I guess
                 println!("Quit");
                 break;
             }
-            Ok(Message::Red) => {
-                println!("Red");
-                tray.set_icon(IconSource::Resource("another-name-from-rc-file"))
-                    .unwrap();
-            }
-            Ok(Message::Green) => {
-                println!("Green");
-                tray.set_icon(IconSource::Resource("name-of-icon-in-rc-file"))
-                    .unwrap()
+            Ok(Message::Open) => {
+                // Open app
+                loop {
+                    // Try to receive at the start, and if quit exit
+
+                    // Verify if is connected, if yes, show buttons to create links,
+                    // If not, show connection panel
+
+                    // If exited, just stay as the background task and tray
+                }
             }
             _ => {}
         }
