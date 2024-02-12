@@ -2,6 +2,8 @@ use std::sync::mpsc;
 use tray_item::{IconSource, TrayItem};
 use std::thread;
 
+mod wallpaper_manager;
+
 enum Message {
     Quit,
     Open,
@@ -30,10 +32,17 @@ fn main() {
     })
     .unwrap();
 
+    let manager = wallpaper_manager::WallpaperManager::new();
+
+    let manage = manager.clone();
+
+    thread::spawn(move || {
+        // Run wallpaper manager in the background
+        println!("{}", manage.is_connected());
+        manage.background_task();
+    });
+
     loop {
-        thread::spawn(|| {
-            // Run wallpaper manager in the background
-        });
         match rx.recv() {
             Ok(Message::Quit) => {
                 // Shutdown the background task too I guess
