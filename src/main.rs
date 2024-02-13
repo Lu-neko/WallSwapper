@@ -3,6 +3,7 @@ use tray_item::{IconSource, TrayItem};
 use std::thread;
 
 mod wallpaper_manager;
+mod application;
 
 enum Message {
     Quit,
@@ -18,9 +19,9 @@ fn main() {
 
     let (tx, rx) = mpsc::sync_channel(1);
 
-    let red_tx = tx.clone();
+    let open_tx = tx.clone();
     tray.add_menu_item("Open App", move || {
-        red_tx.send(Message::Open).unwrap();
+        open_tx.send(Message::Open).unwrap();
     })
     .unwrap();
 
@@ -42,23 +43,35 @@ fn main() {
         manage.background_task();
     });
 
+    let appli = application::ApplicationManager::new(manager);
+
+    let app = appli.clone();
+
+    thread::spawn(move || {
+        app.background_task()
+    });
+
+
     loop {
         match rx.recv() {
             Ok(Message::Quit) => {
                 // Shutdown the background task too I guess
-                println!("Quit");
+                appli.send(application::Message::Quit);
                 break;
             }
             Ok(Message::Open) => {
+
+                println!("Open!");
+
+                appli.send(application::Message::Start);
                 // Open app
-                loop {
-                    // Try to receive at the start, and if quit exit
+                
+                // Try to receive at the start, and if quit exit
 
-                    // Verify if is connected, if yes, show buttons to create links,
-                    // If not, show connection panel
+                // Verify if is connected, if yes, show buttons to create links,
+                // If not, show connection panel
 
-                    // If exited, just stay as the background task and tray
-                }
+                // If exited, just stay as the background task and tray
             }
             _ => {}
         }
