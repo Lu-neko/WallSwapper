@@ -2,12 +2,19 @@ use keyring::{Entry};
     use wallpaper;
 use std::thread;
 use std::time::Duration;
+use reqwest::{StatusCode};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+
+
+const SERVER_URL: &str = "http://127.0.0.1:5000";
+
 
 #[derive(Clone)]
 pub struct WallpaperManager {
     storable: bool,
-    connected: bool,
-    token: String
+    connected: Arc<Mutex<bool>>,
+    token: Arc<Mutex<String>>
 }
 
 impl WallpaperManager {
@@ -21,8 +28,8 @@ impl WallpaperManager {
                     Ok(token) => {
                         return Self {
                             storable:storable,
-                            connected:true,
-                            token:token
+                            connected:Arc::new(Mutex::new(true)),
+                            token:Arc::new(Mutex::new(token))
                         }
                     },
                     Err(_) => {},
@@ -33,47 +40,80 @@ impl WallpaperManager {
 
         Self {
             storable:storable,
-            connected:false,
-            token:String::new()
+            connected:Arc::new(Mutex::new(false)),
+            token:Arc::new(Mutex::new(String::new()))
         }
     }
 
     pub fn is_connected(&self) -> bool {
-        return self.connected;
+        return *self.connected.lock().unwrap();
     }
 
-    pub fn connect(&self, _username: &str, _password: &str, save: bool) -> bool{
+    pub fn connect(&mut self, _username: &str, _password: &str, save: bool) -> bool{
 
         println!("Nya!");
         // Connect
-        let token = "test";
-        let connected = true;
+        {
+            let mut token = self.token.lock().unwrap();
+            *token = "test".to_string();
 
-        if connected && save && self.storable {
+            let mut connected = self.connected.lock().unwrap();
+            *connected = true;
+        }
+
+        if self.is_connected() && save && self.storable {
             match Entry::new("WallSwapper", "User") {
-                Ok(storage) => {let _ = storage.set_password(token);},
+                Ok(storage) => {let _ = storage.set_password(self.token.lock().unwrap().as_str());}, //self.token.lock().unpack().to_str());},
                 Err(_) => {},
             }
         };
 
-        connected
+        self.is_connected()
     }
 
     pub fn background_task(&self) {
 
         loop {
-            if self.connected {
+            println!("{}", self.is_connected());
+            if self.is_connected() {
                 // Request for background
-                let mut url = String::from("https://wallswapper.luneko.dev/api/update/");
 
-                url.push_str(&self.token);
+                {
+                    let mut form = HashMap::new();
+                    let token = self.token.lock().unwrap();
+                    form.insert("token", token.as_str());
+
+                    //let mut url = String::from("https://wallswapper.luneko.dev/api/update/");
+
+                    let client = reqwest::blocking::Client::new();
+                    let res = client.post(SERVER_URL.to_owned() + "/api/update")
+                        .json(&form)
+                        .send();
+
+                    match res {
+                        Ok(resp) => {
+                            match resp.status() {
+                                StatusCode::CREATED => {
+                                    println!("Nya New")
+                                }
+                                StatusCode::NO_CONTENT => {
+                                    println!("Nya No New");
+                                }
+                                _ => {
+                                    println!("Nya Erreur");
+                                }
+                            }
+                        },
+                        Err(_) => {
+                            println!("Erreur get");
+                        }
+                    }
+                }
                 
-                wallpaper::set_from_url(&url).unwrap();
-                wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
-            } else {
-                continue;
+                //wallpaper::set_from_url(&url).unwrap();
+                //wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
             }
-            thread::sleep(Duration::from_secs(60));
+            thread::sleep(Duration::from_secs(5));
         }
     }
 }

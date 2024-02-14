@@ -59,7 +59,7 @@ impl ApplicationManager {
         wind.end();
         wind.show();
 
-        let wall = self.wallpaper.clone();
+        let mut wall = self.wallpaper.clone();
         let appli = self.clone();
         but.set_callback(move |_| {
 

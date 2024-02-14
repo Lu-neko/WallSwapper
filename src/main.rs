@@ -38,8 +38,6 @@ fn main() {
     let manage = manager.clone();
 
     thread::spawn(move || {
-        // Run wallpaper manager in the background
-        println!("{}", manage.is_connected());
         manage.background_task();
     });
 
@@ -55,7 +53,6 @@ fn main() {
     loop {
         match rx.recv() {
             Ok(Message::Quit) => {
-                // Shutdown the background task too I guess
                 appli.send(application::Message::Quit);
                 break;
             }
@@ -64,14 +61,6 @@ fn main() {
                 println!("Open!");
 
                 appli.send(application::Message::Start);
-                // Open app
-                
-                // Try to receive at the start, and if quit exit
-
-                // Verify if is connected, if yes, show buttons to create links,
-                // If not, show connection panel
-
-                // If exited, just stay as the background task and tray
             }
             _ => {}
         }
