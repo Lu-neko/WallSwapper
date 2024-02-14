@@ -9,6 +9,7 @@ edition = "2021"
 fltk = "1.4.24"
 keyring = "2.3.2"
 tray-item = { version = "0.9.0", features = ["ksni"] }
+reqwest = { version = "0.11.24", features = ["json"] }
 wallpaper = { version = "3.2.0", features = ["from_url"] }
 
 [build-dependencies]
