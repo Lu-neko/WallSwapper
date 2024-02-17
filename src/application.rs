@@ -79,7 +79,6 @@ impl ApplicationManager {
             }
         }
 
-        app.quit();
 
         false
     }

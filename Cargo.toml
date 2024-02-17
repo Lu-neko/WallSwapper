@@ -6,11 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fltk = "1.4.24"
+fltk = { version = "1.4.24", features = ["fltk-bundled"] }
 keyring = "2.3.2"
-tray-item = { version = "0.9.0", features = ["ksni"] }
+tray-item = { version = "0.9.0" }
 reqwest = { version = "0.11.24", features = ["json"] }
 wallpaper = { version = "3.2.0", features = ["from_url"] }
+
+[target.'cfg(not(windows))'.dependencies]
+tray-item = { version = "0.9.0", features = ["ksni"] }
 
 [build-dependencies]
 embed-resource = "2.3"
