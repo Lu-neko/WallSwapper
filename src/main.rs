@@ -57,7 +57,7 @@ fn main() {
                 break;
             }
             Ok(Message::Open) => {
-
+                
                 println!("Open!");
 
                 appli.send(application::Message::Start);

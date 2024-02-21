@@ -63,9 +63,9 @@ impl ApplicationManager {
         let appli = self.clone();
         but.set_callback(move |_| {
 
-            wall.connect("salut", "bonjour", false);
+            wall.connect("lune", "neko", false);
             appli.send(Message::Update);
-        }); // the closure capture is mutable borrow to our button
+        });
 
         while app.wait() {
             match self.receiver.recv() {

@@ -49,21 +49,50 @@ impl WallpaperManager {
         return *self.connected.lock().unwrap();
     }
 
-    pub fn connect(&mut self, _username: &str, _password: &str, save: bool) -> bool{
+    pub fn connect(&mut self, username: &str, password: &str, save: bool) -> bool{
 
-        println!("Nya!");
-        // Connect
-        {
-            let mut token = self.token.lock().unwrap();
-            *token = "test".to_string();
+        let mut form = HashMap::new();
+        form.insert("username", username);
+        form.insert("password", password);
 
-            let mut connected = self.connected.lock().unwrap();
-            *connected = true;
+        let client = reqwest::blocking::Client::new();
+        let res = client.post(SERVER_URL.to_owned() + "/api/connect")
+            .json(&form)
+            .send();
+
+        match res {
+            Ok(resp) => {
+                match resp.status() {
+                    StatusCode::OK => {
+                        if let Ok(text) = resp.text() {
+                            println!("{:?}", text);
+                            {
+                                let mut token = self.token.lock().unwrap();
+                                *token = text.to_string();
+
+                                let mut connected = self.connected.lock().unwrap();
+                                *connected = true;
+                            }
+                        }
+                    },
+                    StatusCode::UNAUTHORIZED => {
+                        return false;
+                    },
+                    _ => {
+                        println!("Nya Error");
+                    }
+                }
+            },
+            Err(_) => {
+                println!("Error connect");
+            }
         }
 
         if self.is_connected() && save && self.storable {
             match Entry::new("WallSwapper", "User") {
-                Ok(storage) => {let _ = storage.set_password(self.token.lock().unwrap().as_str());}, //self.token.lock().unpack().to_str());},
+                Ok(storage) => {
+                    let _ = storage.set_password(self.token.lock().unwrap().as_str());
+                },
                 Err(_) => {},
             }
         };
@@ -93,25 +122,23 @@ impl WallpaperManager {
                     match res {
                         Ok(resp) => {
                             match resp.status() {
-                                StatusCode::CREATED => {
-                                    println!("Nya New")
-                                }
-                                StatusCode::NO_CONTENT => {
-                                    println!("Nya No New");
-                                }
+                                StatusCode::OK => {
+                                    if let Ok(url) = resp.text() {
+                                        println!("{:?}", &(SERVER_URL.to_owned() + "/api/images/" + &url.as_str()));
+                                        wallpaper::set_from_url(&(SERVER_URL.to_owned() + "/api/images/" + &url.as_str())).unwrap();
+                                        wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
+                                    }
+                                },
                                 _ => {
-                                    println!("Nya Erreur");
+                                    println!("Nya Error");
                                 }
                             }
                         },
                         Err(_) => {
-                            println!("Erreur get");
+                            println!("Error get");
                         }
                     }
                 }
-                
-                //wallpaper::set_from_url(&url).unwrap();
-                //wallpaper::set_mode(wallpaper::Mode::Fit).unwrap();
             }
             thread::sleep(Duration::from_secs(5));
         }
