@@ -1,0 +1,132 @@
+:root {
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+
+    color: #0f0f0f;
+    background-color: #f6f6f6;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+
+body {
+    --primary-color: #4E3366;
+        --primary-color-lighten-10: #673d7c;
+        --primary-color-lighten-20: #764386;
+        --primary-color-lighten-30: #864a91;
+        --primary-color-lighten-40: #925098;
+        --primary-color-lighten-50: #a163a7;
+    margin:0;
+    text-align:center;
+    background-color:var(--primary-color);
+/*   color: #C88AFF; */
+    --icon-color: #C88AFF;
+        color: #eee;
+    
+    font-family: "Noto Sans", sans-serif;
+    height: 100vh;
+}
+
+main {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+}
+
+.connect-box {
+    width: auto;
+    height: auto;
+    padding: 0rem;
+    flex-direction: column;
+}
+
+* {
+    font-family: inherit;
+}
+
+span {
+}
+
+.flex {
+    display:flex;
+    justify-content:center;
+}
+
+.divider {
+    flex: 1;
+}
+
+.row {
+    flex-direction:row;
+    padding-bottom: 1rem;
+}
+
+button {
+    color: inherit;
+    background-color: #D8F1D6;
+}
+
+input, button {
+    border-radius: 3px;
+/*   border-color: var(--icon-color); */
+    border: 0;
+    
+    
+    background-color: var(--primary-color-lighten-10);
+    
+}
+
+button:hover {
+    background-color: var(--primary-color-lighten-30);
+}
+button:active {
+    background-color: var(--primary-color-lighten-40);
+}
+
+button {
+    padding: 0.25rem 0.8rem;
+    font-size: 1rem;
+}
+input {
+    background-color: #eee;
+    padding: 0.25rem 0.5rem;
+    margin-left: 1rem;
+}
+
+h2 {
+    padding: 0;
+}
+
+/* 
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+input[type="file"] > input[type="button"]::-moz-focus-inner
+{border:0;padding:0;margin:0;}
+ */
+
+hr {
+    height:5px;
+    overflow: visible;
+    border: none;
+    border-top: 3px double #fff;
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+hr:after {
+    background: var(--primary-color);
+    content:'Or';
+    position: relative;
+    top: -13px;
+    color:#eee;
+    padding:0 5px;
+}
