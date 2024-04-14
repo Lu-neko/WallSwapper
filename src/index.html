@@ -5,27 +5,24 @@
         <link rel="stylesheet" href="styles.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>WallSwapper</title>
-        <script type="module" src="/main.js" defer></script>
+        <script type="module" src="/pageHandler.js" defer></script>
     </head>
 
     <body>
-        <main>
-            <div class="connect-box">
-                <h2>WallSwapper</h2>
-                <div class="flex row">
-                    <span>Username</span>
-                    <div class="divider"></div>
-                    <input />
-                </div>
-                <div class="flex row">
-                    <span>Password</span>
-                    <div class="divider"></div>
-                    <input type="password" />
-                </div>
-                <button>Login</button>
-                <hr />
-                <button>Register</button>
+        <include src="connect.html" state="show" name="connect"></include>
+        <!--<main id="global_page">
+            <div id="menu">
             </div>
-        </main>
+            <div>
+                <div id="global">
+                </div>
+                <div id="links">
+                </div>
+                <div id="friends">
+                </div>
+                <div id="settings">
+                </div>
+            </div>
+        </main>-->
     </body>
 </html>

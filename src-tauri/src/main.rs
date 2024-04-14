@@ -3,13 +3,27 @@
 
 use tauri::{CustomMenuItem, SystemTray, SystemTrayMenu, SystemTrayMenuItem, Manager, SystemTrayEvent};
 
+mod api_point;
+use api_point::{APIPoint, UserData};
+
+mod background_manager;
+use background_manager::{WallpaperManager};
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello {}!", name)
+async fn connect(api: tauri::State<'_, APIPoint>, username: String, password: String) -> Result<(), u8>  {
+    api.connect(&username, &password).await.map_err(|err| err as u8)
+}
+
+#[tauri::command]
+async fn get_informations(api: tauri::State<'_, APIPoint>) -> Result<UserData, u8> {
+    api.get_informations().await.map_err(|err| err as u8)
 }
 
 fn main() {
+    let api = APIPoint::new();
+    let mut wall_manager = WallpaperManager::new(api.clone());
+
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let hide = CustomMenuItem::new("show".to_string(), "Show");
     let tray_menu = SystemTrayMenu::new()
@@ -19,7 +33,11 @@ fn main() {
     let system_tray = SystemTray::new()
         .with_menu(tray_menu);
     tauri::Builder::default()
+        .manage(api)
         .setup(|_| {
+            tauri::async_runtime::spawn(async move {
+                let _ = wall_manager.background_task().await;
+            });
             //app.get_window("main").unwrap().hide().unwrap();
             Ok(())
         })
@@ -39,7 +57,7 @@ fn main() {
             }
             _ => {}
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![connect, get_informations])
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 event.window().hide().unwrap();
